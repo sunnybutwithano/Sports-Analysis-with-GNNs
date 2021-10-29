@@ -1,0 +1,193 @@
+Not removing - Iterating on all of the data:
+epoch: 0 - train loss 0.31254074301589096 - train acc: 0.9471364783537177 - eval acc: 0.3179057591623037
+epoch: 1 - train loss 0.005125613023566156 - train acc: 0.9991069695204815 - eval acc: 0.16240837696335078
+epoch: 2 - train loss 0.0010599867776246617 - train acc: 0.9997864492331586 - eval acc: 0.14670157068062828
+epoch: 3 - train loss 0.0007900766021991627 - train acc: 0.9998252766453116 - eval acc: 0.14910994764397906
+epoch: 4 - train loss 0.00040059310209350165 - train acc: 0.999883517763541 - eval acc: 0.1489005235602094
+epoch: 5 - train loss 0.00047469852636885943 - train acc: 0.9998446903513881 - eval acc: 0.14408376963350786
+epoch: 6 - train loss 0.0002793565751546501 - train acc: 0.9999029314696175 - eval acc: 0.1450261780104712
+(15, 100)
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+Not removing - Iterating on each Window:
+window: 0 - train loss 1.0708708822727204 - train acc: 0.57 - eval acc: 0.33
+window: 1 - train loss 1.3688911080360413 - train acc: 0.51 - eval acc: 0.36
+window: 2 - train loss 1.408935503164927 - train acc: 0.47444444444444445 - eval acc: 0.33
+window: 3 - train loss 1.39010040362676 - train acc: 0.42083333333333334 - eval acc: 0.35
+window: 4 - train loss 1.2917763948440553 - train acc: 0.42866666666666664 - eval acc: 0.3
+window: 5 - train loss 1.4050792495409647 - train acc: 0.38166666666666665 - eval acc: 0.32
+window: 6 - train loss 1.4062973340352376 - train acc: 0.39904761904761904 - eval acc: 0.32
+...
+window: 95 - train loss 1.395195472240448 - train acc: 0.34663194444444445 - eval acc: 0.34
+window: 96 - train loss 1.3965110500653586 - train acc: 0.34642611683848795 - eval acc: 0.325
+window: 97 - train loss 1.3958700974782308 - train acc: 0.34717687074829934 - eval acc: 0.3
+window: 98 - train loss 1.3966196775436401 - train acc: 0.3504713804713805 - eval acc: 0.25
+window: 99 - train loss 1.3958900332450868 - train acc: 0.3493 - eval acc: 0.2
+(33, 100)
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+Removing - Only Last week is Supervision - Iterating on all of the data:
+epoch: 0 - train loss 1.0384344641524967 - train acc: 0.4643564356435644 - eval acc: 0.4529842931937173
+epoch: 1 - train loss 0.993062684441557 - train acc: 0.49504950495049505 - eval acc: 0.47717277486911
+epoch: 2 - train loss 0.9646260944923551 - train acc: 0.5336633663366337 - eval acc: 0.509738219895288
+epoch: 3 - train loss 0.9356358694558097 - train acc: 0.5534653465346535 - eval acc: 0.5238743455497382
+epoch: 4 - train loss 0.8956227343861419 - train acc: 0.598019801980198 - eval acc: 0.570890052356021
+epoch: 5 - train loss 0.8431948626985645 - train acc: 0.6277227722772277 - eval acc: 0.606282722513089
+epoch: 6 - train loss 0.7964691667273494 - train acc: 0.6554455445544555 - eval acc: 0.6360209424083769
+epoch: 7 - train loss 0.7221835435617088 - train acc: 0.6881188118811881 - eval acc: 0.670890052356021
+epoch: 8 - train loss 0.688649511425802 - train acc: 0.7227722772277227 - eval acc: 0.6871204188481675
+epoch: 9 - train loss 0.6615106575559861 - train acc: 0.7217821782178218 - eval acc: 0.707958115183246
+epoch: 10 - train loss 0.5897871270628259 - train acc: 0.7564356435643564 - eval acc: 0.7338219895287958
+epoch: 11 - train loss 0.5526566841814777 - train acc: 0.7702970297029703 - eval acc: 0.7586387434554974
+epoch: 12 - train loss 0.5246225728256868 - train acc: 0.7861386138613862 - eval acc: 0.7598952879581152
+epoch: 13 - train loss 0.5080597191163809 - train acc: 0.7930693069306931 - eval acc: 0.7751832460732985
+epoch: 14 - train loss 0.435066949908096 - train acc: 0.8237623762376237 - eval acc: 0.8001047120418848
+epoch: 15 - train loss 0.40687487252277904 - train acc: 0.8504950495049505 - eval acc: 0.8147643979057592
+epoch: 16 - train loss 0.4142738338006605 - train acc: 0.8386138613861386 - eval acc: 0.8004188481675393
+epoch: 17 - train loss 0.37269565898298035 - train acc: 0.8504950495049505 - eval acc: 0.808586387434555
+epoch: 18 - train loss 0.33374013888216253 - train acc: 0.8712871287128713 - eval acc: 0.8312041884816754
+epoch: 19 - train loss 0.3180991621540472 - train acc: 0.8702970297029703 - eval acc: 0.8493193717277487
+epoch: 20 - train loss 0.3363254641984949 - train acc: 0.8683168316831683 - eval acc: 0.8385340314136126
+epoch: 21 - train loss 0.2946537651564225 - train acc: 0.8801980198019802 - eval acc: 0.8540314136125654
+epoch: 22 - train loss 0.2721180123101809 - train acc: 0.900990099009901 - eval acc: 0.8623036649214659
+epoch: 23 - train loss 0.25003961975326633 - train acc: 0.9099009900990099 - eval acc: 0.8649214659685864
+epoch: 24 - train loss 0.3097872340332459 - train acc: 0.8851485148514852 - eval acc: 0.8475392670157068
+epoch: 25 - train loss 0.2597445196813286 - train acc: 0.898019801980198 - eval acc: 0.8673298429319372
+epoch: 26 - train loss 0.28077850040822927 - train acc: 0.8910891089108911 - eval acc: 0.8558115183246073
+epoch: 27 - train loss 0.23125016668092202 - train acc: 0.9108910891089109 - eval acc: 0.8736125654450262
+epoch: 28 - train loss 0.17859152735828762 - train acc: 0.9257425742574258 - eval acc: 0.8891099476439791
+epoch: 29 - train loss 0.14631182841477122 - train acc: 0.9435643564356435 - eval acc: 0.9006282722513089
+epoch: 0 - train loss 0.18181441719228825 - train acc: 0.9376237623762376 - eval acc: 0.8954973821989529
+epoch: 1 - train loss 0.1751014827612308 - train acc: 0.9267326732673268 - eval acc: 0.9012565445026178
+epoch: 2 - train loss 0.19703308206125356 - train acc: 0.9277227722772278 - eval acc: 0.8892146596858639
+epoch: 3 - train loss 0.2135579910539644 - train acc: 0.9217821782178218 - eval acc: 0.892565445026178
+epoch: 4 - train loss 0.16724594817370048 - train acc: 0.9455445544554455 - eval acc: 0.8939267015706807
+epoch: 5 - train loss 0.12583095489281904 - train acc: 0.9544554455445544 - eval acc: 0.9094240837696335
+epoch: 6 - train loss 0.12620795240146246 - train acc: 0.9504950495049505 - eval acc: 0.9040837696335079
+epoch: 7 - train loss 0.151109160801239 - train acc: 0.9495049504950495 - eval acc: 0.9234554973821989
+epoch: 8 - train loss 0.13643351861386385 - train acc: 0.9564356435643564 - eval acc: 0.9077486910994764
+epoch: 9 - train loss 0.12445160531955264 - train acc: 0.9544554455445544 - eval acc: 0.9152879581151833
+epoch: 10 - train loss 0.10562376109514349 - train acc: 0.9603960396039604 - eval acc: 0.9081675392670157
+epoch: 11 - train loss 0.13163904979246402 - train acc: 0.9495049504950495 - eval acc: 0.9103664921465968
+epoch: 12 - train loss 0.1988381565108176 - train acc: 0.9316831683168317 - eval acc: 0.898848167539267
+epoch: 13 - train loss 0.1973069357907049 - train acc: 0.9326732673267327 - eval acc: 0.8927748691099476
+epoch: 14 - train loss 0.1643344550324364 - train acc: 0.9485148514851485 - eval acc: 0.9128795811518324
+epoch: 15 - train loss 0.11393652306431627 - train acc: 0.9603960396039604 - eval acc: 0.9279581151832461
+epoch: 16 - train loss 0.11950236854217208 - train acc: 0.9633663366336633 - eval acc: 0.9312041884816754
+epoch: 17 - train loss 0.1143222622035099 - train acc: 0.9524752475247524 - eval acc: 0.9278534031413612
+epoch: 18 - train loss 0.14327903445879236 - train acc: 0.9574257425742574 - eval acc: 0.930890052356021
+epoch: 19 - train loss 0.0951541144703976 - train acc: 0.9712871287128713 - eval acc: 0.9226178010471204
+epoch: 20 - train loss 0.07994694674720683 - train acc: 0.9702970297029703 - eval acc: 0.9313089005235602
+epoch: 21 - train loss 0.1662398370185701 - train acc: 0.9415841584158415 - eval acc: 0.9145549738219896
+epoch: 22 - train loss 0.15888327619263737 - train acc: 0.9445544554455445 - eval acc: 0.9093193717277487
+epoch: 23 - train loss 0.0772155304064762 - train acc: 0.9752475247524752 - eval acc: 0.933717277486911
+epoch: 24 - train loss 0.08038916377328932 - train acc: 0.9732673267326732 - eval acc: 0.9379057591623037
+epoch: 25 - train loss 0.07831099438210165 - train acc: 0.9702970297029703 - eval acc: 0.9336125654450261
+epoch: 26 - train loss 0.12080004651763357 - train acc: 0.9623762376237623 - eval acc: 0.9184293193717278
+epoch: 27 - train loss 0.13919239417859583 - train acc: 0.9574257425742574 - eval acc: 0.9299476439790576
+epoch: 28 - train loss 0.1011359686297618 - train acc: 0.9693069306930693 - eval acc: 0.9426178010471205
+epoch: 29 - train loss 0.07623645109769953 - train acc: 0.9742574257425742 - eval acc: 0.9363350785340314
+epoch: 0 - train loss 0.09537199789100317 - train acc: 0.9683168316831683 - eval acc: 0.9373821989528796
+epoch: 1 - train loss 0.08646846711601011 - train acc: 0.9722772277227723 - eval acc: 0.9241884816753927
+epoch: 2 - train loss 0.10836141100550983 - train acc: 0.9633663366336633 - eval acc: 0.9384293193717278
+epoch: 3 - train loss 0.0926366538658858 - train acc: 0.9712871287128713 - eval acc: 0.9264921465968586
+epoch: 4 - train loss 0.11252630164006514 - train acc: 0.9623762376237623 - eval acc: 0.923979057591623
+epoch: 5 - train loss 0.10991698962355051 - train acc: 0.9603960396039604 - eval acc: 0.9304712041884817
+epoch: 6 - train loss 0.09459195011566246 - train acc: 0.9702970297029703 - eval acc: 0.9390575916230367
+epoch: 7 - train loss 0.12991099237360054 - train acc: 0.9524752475247524 - eval acc: 0.9250261780104712
+epoch: 8 - train loss 0.11026576985685745 - train acc: 0.9584158415841584 - eval acc: 0.9250261780104712
+epoch: 9 - train loss 0.05593822917588041 - train acc: 0.9851485148514851 - eval acc: 0.9329842931937172
+epoch: 10 - train loss 0.07593219950397517 - train acc: 0.9752475247524752 - eval acc: 0.9401047120418848
+epoch: 11 - train loss 0.1127811835791759 - train acc: 0.9613861386138614 - eval acc: 0.9197905759162304
+epoch: 12 - train loss 0.09050584140136875 - train acc: 0.9663366336633663 - eval acc: 0.9319371727748691
+epoch: 13 - train loss 0.1475937627925881 - train acc: 0.9524752475247524 - eval acc: 0.9230366492146597
+epoch: 14 - train loss 0.12298464675743415 - train acc: 0.9584158415841584 - eval acc: 0.9343455497382199
+epoch: 15 - train loss 0.10291034948642107 - train acc: 0.9574257425742574 - eval acc: 0.9364397905759162
+epoch: 16 - train loss 0.06646122450947227 - train acc: 0.9762376237623762 - eval acc: 0.9519371727748691
+epoch: 17 - train loss 0.08203256814936545 - train acc: 0.9702970297029703 - eval acc: 0.9589528795811518
+epoch: 18 - train loss 0.05339487487262796 - train acc: 0.9831683168316832 - eval acc: 0.9535078534031414
+epoch: 19 - train loss 0.05713627455301465 - train acc: 0.9782178217821782 - eval acc: 0.949109947643979
+epoch: 20 - train loss 0.061115725801555255 - train acc: 0.9742574257425742 - eval acc: 0.9526701570680628
+epoch: 21 - train loss 0.1751898667647729 - train acc: 0.9445544554455445 - eval acc: 0.9037696335078534
+epoch: 22 - train loss 0.09300798707466462 - train acc: 0.9712871287128713 - eval acc: 0.9397905759162304
+epoch: 23 - train loss 0.05688321689261345 - train acc: 0.9811881188118812 - eval acc: 0.9426178010471205
+epoch: 24 - train loss 0.07849677998182424 - train acc: 0.9782178217821782 - eval acc: 0.9448167539267016
+epoch: 25 - train loss 0.07043686742751858 - train acc: 0.9772277227722772 - eval acc: 0.9530890052356021
+epoch: 26 - train loss 0.09713567895683846 - train acc: 0.9702970297029703 - eval acc: 0.9287958115183246
+epoch: 27 - train loss 0.10290795661673863 - train acc: 0.9653465346534653 - eval acc: 0.9410471204188482
+epoch: 28 - train loss 0.07581643121043856 - train acc: 0.9732673267326732 - eval acc: 0.9365445026178011
+epoch: 29 - train loss 0.06761330721547164 - train acc: 0.9782178217821782 - eval acc: 0.946282722513089
+(59, 100)
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+Removing - Only Last week is Supervision - Iterating on each Window:
+window: 1 - train loss 1.1261347909768422 - train acc: 0.3233333333333333 - eval acc: 0.29
+window: 2 - train loss 1.1144853154818217 - train acc: 0.3933333333333333 - eval acc: 0.28
+window: 3 - train loss 1.2660636186599732 - train acc: 0.19 - eval acc: 0.3
+window: 4 - train loss 1.1652896801630657 - train acc: 0.23 - eval acc: 0.33
+window: 5 - train loss 1.2050739725430806 - train acc: 0.27666666666666667 - eval acc: 0.33
+window: 6 - train loss 1.1748838464419047 - train acc: 0.39666666666666667 - eval acc: 0.31
+window: 7 - train loss 1.1706843733787538 - train acc: 0.38 - eval acc: 0.28
+window: 8 - train loss 1.3565096497535705 - train acc: 0.25333333333333335 - eval acc: 0.32
+window: 9 - train loss 1.3142128229141234 - train acc: 0.22333333333333333 - eval acc: 0.35
+window: 10 - train loss 1.271288847923279 - train acc: 0.2633333333333333 - eval acc: 0.35
+window: 11 - train loss 1.3257722457249959 - train acc: 0.08 - eval acc: 0.39
+window: 12 - train loss 1.197183624903361 - train acc: 0.33666666666666667 - eval acc: 0.42
+window: 13 - train loss 1.2691811680793763 - train acc: 0.36 - eval acc: 0.42
+window: 14 - train loss 1.1296263734499614 - train acc: 0.5066666666666667 - eval acc: 0.39
+window: 15 - train loss 1.2644268115361532 - train acc: 0.30666666666666664 - eval acc: 0.43
+window: 16 - train loss 1.128324180841446 - train acc: 0.37 - eval acc: 0.42
+window: 17 - train loss 1.3345605611801148 - train acc: 0.19666666666666666 - eval acc: 0.4
+window: 18 - train loss 1.1657150228818258 - train acc: 0.41333333333333333 - eval acc: 0.39
+window: 19 - train loss 0.931277581055959 - train acc: 0.6033333333333334 - eval acc: 0.31
+window: 20 - train loss 1.2684903661410014 - train acc: 0.3333333333333333 - eval acc: 0.33
+window: 21 - train loss 1.1539869566758474 - train acc: 0.44333333333333336 - eval acc: 0.29
+window: 22 - train loss 1.1599902987480164 - train acc: 0.4666666666666667 - eval acc: 0.26
+window: 23 - train loss 1.2810151775677998 - train acc: 0.31666666666666665 - eval acc: 0.26
+window: 24 - train loss 1.156439443429311 - train acc: 0.39 - eval acc: 0.24
+...
+window: 88 - train loss 1.1247713764508565 - train acc: 0.49 - eval acc: 0.24
+window: 89 - train loss 1.2171218315760295 - train acc: 0.23 - eval acc: 0.23
+window: 90 - train loss 1.3400839606920878 - train acc: 0.12 - eval acc: 0.29
+window: 91 - train loss 1.2806726336479186 - train acc: 0.4166666666666667 - eval acc: 0.26666666666666666
+window: 92 - train loss 1.2021342674891153 - train acc: 0.25 - eval acc: 0.275
+...
+window: 93 - train loss 1.2767224828402202 - train acc: 0.27666666666666667 - eval acc: 0.2714285714285714
+window: 94 - train loss 1.3110998312632243 - train acc: 0.25333333333333335 - eval acc: 0.26666666666666666
+window: 95 - train loss 1.1657612482706705 - train acc: 0.29 - eval acc: 0.28
+window: 96 - train loss 1.1697230537732441 - train acc: 0.24666666666666667 - eval acc: 0.275
+window: 97 - train loss 1.3215857148170471 - train acc: 0.18 - eval acc: 0.3
+(32, 100)
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Not Removing - Only Last week is Supervision - Iterating on all of the data:
+epoch: 0 - train loss 0.46351741703566035 - train acc: 0.8168316831683168 - eval acc: 0.40293193717277487
+epoch: 1 - train loss 0.05664131654764175 - train acc: 0.9841584158415841 - eval acc: 0.2206282722513089
+epoch: 2 - train loss 0.01674691576081026 - train acc: 0.9930693069306931 - eval acc: 0.17172774869109947
+epoch: 3 - train loss 0.006749080371210397 - train acc: 0.998019801980198 - eval acc: 0.15895287958115184
+epoch: 4 - train loss 0.0028503111818556116 - train acc: 0.999009900990099 - eval acc: 0.16335078534031414
+epoch: 5 - train loss 0.0014019693171161295 - train acc: 1.0 - eval acc: 0.158848167539267
+epoch: 6 - train loss 0.0008427110873861977 - train acc: 1.0 - eval acc: 0.15225130890052355
+epoch: 7 - train loss 0.0007577030084811714 - train acc: 1.0 - eval acc: 0.1598952879581152
+epoch: 8 - train loss 0.025182831403933733 - train acc: 0.9920792079207921 - eval acc: 0.15979057591623036
+epoch: 9 - train loss 0.02890742307720357 - train acc: 0.9900990099009901 - eval acc: 0.16534031413612565
+(17, 100)

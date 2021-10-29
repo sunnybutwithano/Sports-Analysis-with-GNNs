@@ -1,0 +1,24 @@
+{
+    "learning_rate": 0.001,
+    "num_epochs": 25,
+    "fc_dropout": 0.01,
+    "conv_dropout": 0.01,
+    "emb_dropout": 0.01,
+    "train_messaging_graph_size": 440,
+    "val_messaging_graph_size": 440,
+    "test_messaging_graph_size": 440,
+    "iter_size": 10,
+    "val_week_denom": 50,
+    "test_week_denom": 60,
+    "embedding_dim": 32,
+    "conv_dims": [
+        32,
+        32,
+        32,
+        32
+    ],
+    "fully_connected_dims": [
+        32,
+        32
+    ]
+}

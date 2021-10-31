@@ -57,8 +57,8 @@ for league, leaguedf in dataset.groupby('league'):
     print('Training On:', league)
     train_data = leaguedf.iloc[: int(leaguedf.shape[0]* 0.9) - 1, :]
     test_data = leaguedf.iloc[int(leaguedf.shape[0]* 0.9):, :]
-    #continuousGrowingTrainer(leaguedf, entities, model, optimizer, criterion, num_epochs, 10)
-    continuousWindowTrainer(train_data, entities, model, optimizer, criterion, num_epochs, 30, 10)
+    continuousGrowingTrainer(leaguedf, entities, model, optimizer, criterion, num_epochs, 10)
+    # continuousWindowTrainer(train_data, entities, model, optimizer, criterion, num_epochs, 30, 10)
 
     print('Testing On:', league)
     continuousWindowTester(leaguedf, test_data, entities, model, optimizer, criterion, 0, 30, 30)

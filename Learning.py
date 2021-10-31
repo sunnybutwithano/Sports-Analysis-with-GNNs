@@ -267,7 +267,7 @@ def continuousWindowTester(full_df: pd.DataFrame, test_df: pd.DataFrame, entitie
         icorrect, itotal = evaluate(model, test_graphs[i])
         tcorrect += icorrect
         ttotal += itotal
-        train(model, train_graphs[i], optimizer, criterion)
+        #train(model, train_graphs[i], optimizer, criterion)
     print(f"Test Accuracy: {tcorrect / ttotal}")
 
 

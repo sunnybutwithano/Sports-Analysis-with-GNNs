@@ -136,3 +136,13 @@ class DataLoader:
         ])
 
         return hteams, ateams, hplayers, aplayers
+
+
+    def ConverDatasetResultstoNumber(self, dataframe: pd.DataFrame):
+        conds = [
+        (dataframe['result'] == 'win'),
+        (dataframe['result'] == 'tie'),
+        (dataframe['result'] == 'loss')
+        ]
+        choices = [0, 1, 2]
+        np.select(conds, choices)

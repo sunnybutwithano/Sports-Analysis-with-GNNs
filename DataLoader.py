@@ -145,4 +145,4 @@ class DataLoader:
         (dataframe['result'] == 'loss')
         ]
         choices = [0, 1, 2]
-        np.select(conds, choices)
+        return np.select(conds, choices)

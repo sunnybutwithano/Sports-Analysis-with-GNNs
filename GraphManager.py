@@ -5,7 +5,9 @@ import numpy as np
 import enum
 import pandas as pd
 from DataLoader import DataLoader
-from typing import Tuple
+from tqdm.notebook import tqdm
+from typing import Literal
+import pickle
 
 
 
@@ -36,37 +38,39 @@ class GraphManager:
         self.test_mask = []
         
 
-    def _DataLoaderNodeTexttoNodeID(nodetext: Tuple[np.ndarray]):
-        team_node_to_id = dict()
-        team_id_to_node = dict()
-        player_node_to_id = dict()
-        player_id_to_node = dict()
-        node_id = 0
-
-        for hteam, ateam in zip(nodetext[0], nodetext[1]):
-            team_node_to_id[hteam] = node_id
-            team_id_to_node[node_id] = hteam
-            node_id += 1
-            team_node_to_id[ateam] = node_id
-            team_id_to_node[node_id] = hteam
-            node_id +=1
-
-        node_id = 0
+    def make(self, df: pd.DataFrame, 
+        mode: Literal['CG', 'CW']='CG',
+        validation_portion: float=0.1,
+        test_portion: float=0.1,
+        saveto: str=None
+    ):
+        self.graph_list = []
+        self.train_mask = []
+        self.validation_mask = []
+        self.test_mask = []
+        if mode == 'CG':
+            self._gen_continuous_growing(df)
         
-        for hlineup, alineup in zip(nodetext[2], nodetext[3]):
-            for p in hlineup:
-                player_node_to_id[p] = node_id
-                player_id_to_node[node_id] = p
-                node_id +=1
-            for p in alineup:
-                player_node_to_id[p] = node_id
-                player_id_to_node[node_id] = p
-                node_id +=1
+        self.test_mask = list(range(int((1-test_portion) * len(self.graph_list)), len(self.graph_list)))
+        self.validation_mask = list(range(int((1 - (test_portion+validation_portion)) * len(self.graph_list)), int((1-test_portion) * len(self.graph_list))))
+        self.train_mask = list(range(0, int((1 - (test_portion+validation_portion)) * len(self.graph_list))))
 
-        return team_node_to_id, team_id_to_node, player_node_to_id, player_id_to_node
+        if saveto is not None:
+            with open(saveto, 'wb') as pf:
+                pickle.dump(self, pf)
+    
 
-
-
+    def _gen_continuous_growing(self, df: pd.DataFrame):
+        try:
+            for season, season_df in tqdm(df.groupby('season'), desc='Seasons: '):
+                for week, week_df in tqdm(season_df.groupby('week'), desc='Week: ', leave=False):
+                    g = self._gen_heterodata(
+                        df=df.loc[:week_df.index[-1], :],
+                        supervision_indcs=week_df.index.values
+                    )
+                    self.graph_list.append(g)
+        except KeyboardInterrupt:
+            pass
 
     def _gen_heterodata(self, df: pd.DataFrame, messaging_indcs=0, supervision_indcs=0, remove_supervision_links: bool=True):
         hetero_data = pyg_data.HeteroData()
@@ -223,13 +227,12 @@ class GraphManager:
         )).long().to(self.DEVICE)
 
 
+        #========== Creating Supervision Results ===========
+        hetero_data.y = torch.tensor(
+            self.dl.ConverDatasetResultstoNumber(df.loc[supervision_indcs, :]),
+            device=self.DEVICE
+        )
 
 
         return hetero_data
-
-        for idx, match in df.iterrows():
-            hteam = match[self.dl.HOME_TEAM_KEY]
-            ateam = match[self.dl.AWAY_TEAM_KEY]
-            hlineup = match[self.dl.HOME_LINEUP_KEY]
-            alineup = match[self.dl.AWAY_LINEUP_KEY]
 

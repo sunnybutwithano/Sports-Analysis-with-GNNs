@@ -60,6 +60,7 @@ class GraphManager:
                 pickle.dump(self, pf)
     
 
+
     def _gen_continuous_growing(self, df: pd.DataFrame):
         try:
             for season, season_df in tqdm(df.groupby('season'), desc='Seasons: '):
@@ -236,3 +237,7 @@ class GraphManager:
 
         return hetero_data
 
+
+def load(filename: str):
+        with open(filename, 'rb') as pf:
+            return pickle.load(pf)

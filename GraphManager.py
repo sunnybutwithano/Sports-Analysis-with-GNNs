@@ -13,9 +13,9 @@ from typing import Tuple
 class CONSTANTS(enum.Enum):
     node_types = ['team', 'player']
     edge_types = [
-        ('team', 'win', 'team'),
-        ('team', 'tie', 'team'),
-        ('team', 'loss', 'team'),
+        ('team', 'win', 'team'), #DONE
+        ('team', 'tie', 'team'), #DONE
+        ('team', 'loss', 'team'), #DONE
         ('player', 'playedin', 'team'), #DONE
         ('team', 'used', 'player'), #DONE
         ('player', 'before', 'player'),
@@ -70,6 +70,8 @@ class GraphManager:
 
     def _gen_heterodata(self, df: pd.DataFrame, messaging_indcs=0, supervision_indcs=0, remove_supervision_links: bool=True):
         hetero_data = pyg_data.HeteroData()
+
+        #============ Creating Nodes =================
         team_node_features = self.dl.labeler.transform(np.stack((
             self.dl.DatasetDataframetoNumpy(df)[0],
             self.dl.DatasetDataframetoNumpy(df)[1]
@@ -82,6 +84,9 @@ class GraphManager:
         )), 0, 1).flatten())
         hetero_data['player'].x = torch.tensor(player_node_features, dtype=torch.int, device=self.DEVICE)
 
+
+
+        #========= Creating Node IDs to use in edge index ==========
         node_texts = self.dl.DatasetDataframetoNodeText(df)
         team_node_ids = pd.Series(
             np.arange(node_texts[0].shape[0] * 2),
@@ -98,7 +103,7 @@ class GraphManager:
             )), 0, 1).flatten()
         )
 
-        #creating used and played in links
+        #============ creating used and played_in links ===========
         hetero_data['team', 'used', 'player'].edge_index = torch.stack((
             torch.tensor(np.repeat(team_node_ids.to_numpy(), self.dl.minimum_players_per_team)),
             torch.tensor(player_node_ids.to_numpy())
@@ -108,6 +113,61 @@ class GraphManager:
             torch.tensor(player_node_ids.to_numpy()),
             torch.tensor(np.repeat(team_node_ids.to_numpy(), self.dl.minimum_players_per_team))
         )).long().to(self.DEVICE)
+
+
+        #=========== Creating Match Result Links ============
+        hwins = team_node_ids[
+            self.dl.DatasetDataframetoNodeText(
+                df.loc[df['result'] == 'win', :]
+            )[0]
+        ].to_numpy()
+
+        alosses = team_node_ids[
+            self.dl.DatasetDataframetoNodeText(
+                df.loc[df['result'] == 'win', :]
+            )[1]
+        ].to_numpy()
+
+        hlosses = team_node_ids[
+            self.dl.DatasetDataframetoNodeText(
+                df.loc[df['result'] == 'loss', :]
+            )[0]
+        ].to_numpy()
+
+        awins = team_node_ids[
+            self.dl.DatasetDataframetoNodeText(
+                df.loc[df['result'] == 'loss', :]
+            )[1]
+        ].to_numpy()
+
+        hties = team_node_ids[
+            self.dl.DatasetDataframetoNodeText(
+                df.loc[df['result'] == 'tie', :]
+            )[0]
+        ].to_numpy()
+
+        aties = team_node_ids[
+            self.dl.DatasetDataframetoNodeText(
+                df.loc[df['result'] == 'tie', :]
+            )[1]
+        ].to_numpy()
+
+        hetero_data['team', 'win', 'team'].edge_index = torch.stack((
+            torch.tensor(np.concatenate((hwins, awins))),
+            torch.tensor(np.concatenate((alosses, hlosses)))
+        )).long().to(self.DEVICE)
+
+        hetero_data['team', 'loss', 'team'].edge_index = torch.stack((
+            torch.tensor(np.concatenate((alosses, hlosses))),
+            torch.tensor(np.concatenate((hwins, awins)))
+        )).long().to(self.DEVICE)
+
+        hetero_data['team', 'tie', 'team'].edge_index = torch.stack((
+            torch.tensor(np.concatenate((hties, aties))),
+            torch.tensor(np.concatenate((aties, hties)))
+        )).long().to(self.DEVICE)
+
+
 
         return hetero_data
 

@@ -28,10 +28,9 @@ class CONSTANTS(enum.Enum):
 
 
 class GraphManager:
-    def __init__(self, dl: DataLoader, dataset: pd.DataFrame, DEVICE: str):
+    def __init__(self, dl: DataLoader, DEVICE: str):
         self.DEVICE = DEVICE
         self.dl = dl
-        self.dataset = dataset
         self.graph_list = []
         self.train_mask = []
         self.validation_mask = []

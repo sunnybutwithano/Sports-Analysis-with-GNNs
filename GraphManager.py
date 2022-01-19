@@ -18,10 +18,10 @@ class CONSTANTS(enum.Enum):
         ('team', 'loss', 'team'), #DONE
         ('player', 'playedin', 'team'), #DONE
         ('team', 'used', 'player'), #DONE
-        ('player', 'before', 'player'),
-        ('player', 'after', 'player'),
-        ('team', 'before', 'team'),
-        ('team', 'after', 'team')
+        ('player', 'before', 'player'), #DONE
+        ('player', 'after', 'player'), #DONE
+        ('team', 'before', 'team'), #DONE
+        ('team', 'after', 'team') #DONE
     ]
 
 
@@ -70,17 +70,18 @@ class GraphManager:
 
     def _gen_heterodata(self, df: pd.DataFrame, messaging_indcs=0, supervision_indcs=0, remove_supervision_links: bool=True):
         hetero_data = pyg_data.HeteroData()
+        entity_names = self.dl.DatasetDataframetoNumpy(df)
 
         #============ Creating Nodes =================
         team_node_features = self.dl.labeler.transform(np.stack((
-            self.dl.DatasetDataframetoNumpy(df)[0],
-            self.dl.DatasetDataframetoNumpy(df)[1]
+            entity_names[0],
+            entity_names[1]
         )).T.flatten())
         hetero_data['team'].x = torch.tensor(team_node_features, dtype=torch.int, device=self.DEVICE)
 
         player_node_features = self.dl.labeler.transform(np.moveaxis(np.stack((
-            self.dl.DatasetDataframetoNumpy(df)[2],
-            self.dl.DatasetDataframetoNumpy(df)[3]
+            entity_names[2],
+            entity_names[3]
         )), 0, 1).flatten())
         hetero_data['player'].x = torch.tensor(player_node_features, dtype=torch.int, device=self.DEVICE)
 
@@ -116,39 +117,43 @@ class GraphManager:
 
 
         #=========== Creating Match Result Links ============
+        if remove_supervision_links:
+            result_df = df.drop(supervision_indcs, axis=0)
+        else: result_df = df
+
         hwins = team_node_ids[
             self.dl.DatasetDataframetoNodeText(
-                df.loc[df['result'] == 'win', :]
+                result_df.loc[result_df['result'] == 'win', :]
             )[0]
         ].to_numpy()
 
         alosses = team_node_ids[
             self.dl.DatasetDataframetoNodeText(
-                df.loc[df['result'] == 'win', :]
+                result_df.loc[result_df['result'] == 'win', :]
             )[1]
         ].to_numpy()
 
         hlosses = team_node_ids[
             self.dl.DatasetDataframetoNodeText(
-                df.loc[df['result'] == 'loss', :]
+                result_df.loc[result_df['result'] == 'loss', :]
             )[0]
         ].to_numpy()
 
         awins = team_node_ids[
             self.dl.DatasetDataframetoNodeText(
-                df.loc[df['result'] == 'loss', :]
+                result_df.loc[result_df['result'] == 'loss', :]
             )[1]
         ].to_numpy()
 
         hties = team_node_ids[
             self.dl.DatasetDataframetoNodeText(
-                df.loc[df['result'] == 'tie', :]
+                result_df.loc[result_df['result'] == 'tie', :]
             )[0]
         ].to_numpy()
 
         aties = team_node_ids[
             self.dl.DatasetDataframetoNodeText(
-                df.loc[df['result'] == 'tie', :]
+                result_df.loc[result_df['result'] == 'tie', :]
             )[1]
         ].to_numpy()
 
@@ -166,6 +171,57 @@ class GraphManager:
             torch.tensor(np.concatenate((hties, aties))),
             torch.tensor(np.concatenate((aties, hties)))
         )).long().to(self.DEVICE)
+
+
+
+        #============ Creating Teams Before Afters ==============
+        before_edge_index_list = [[], []]
+        for team in np.unique(np.concatenate((entity_names[0], entity_names[1]))):
+            team_node_texts = []
+            for idx in self.dl.team_play_list[team]:
+                if idx > df.index[-1]: break
+                if idx not in df.index: continue
+                # if idx < df.index[0]: continue
+                # elif idx > df.index[-1]: break
+                else:
+                    team_node_texts.append(f'{team}*{idx}')
+            before_edge_index_list[0].extend(team_node_ids[team_node_texts].to_list()[:-1])
+            before_edge_index_list[1].extend(team_node_ids[team_node_texts].to_list()[1:])
+        
+        hetero_data['team', 'before', 'team'].edge_index = torch.tensor(
+            before_edge_index_list,
+            dtype=torch.long,
+            device=self.DEVICE
+        )
+        hetero_data['team', 'after', 'team'].edge_index = torch.stack((
+            torch.tensor(before_edge_index_list[1]),
+            torch.tensor(before_edge_index_list[0])
+        )).long().to(self.DEVICE)
+
+        
+        #============ Creating Players Before After ==============
+        before_edge_index_list = [[], []]
+        for player in np.unique(np.concatenate((entity_names[2], entity_names[3]))):
+            player_node_texts = []
+            for idx in self.dl.player_play_list[player]:
+                if idx > df.index[-1]: break
+                if idx not in df.index: continue
+                # if idx < df.index[0]: continue
+                else:
+                    player_node_texts.append(f'{player}@{idx}')
+            before_edge_index_list[0].extend(player_node_ids[player_node_texts].to_list()[:-1])
+            before_edge_index_list[1].extend(player_node_ids[player_node_texts].to_list()[1:])
+        
+        hetero_data['player', 'before', 'player'].edge_index = torch.tensor(
+            before_edge_index_list,
+            dtype=torch.long,
+            device=self.DEVICE
+        )
+        hetero_data['player', 'after', 'player'].edge_index = torch.stack((
+            torch.tensor(before_edge_index_list[1]),
+            torch.tensor(before_edge_index_list[0])
+        )).long().to(self.DEVICE)
+
 
 
 

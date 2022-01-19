@@ -229,10 +229,17 @@ class GraphManager:
 
 
         #========== Creating Supervision Results ===========
+        supervision_nodes_text = self.dl.DatasetDataframetoNodeText(df.loc[supervision_indcs, :])
+        hetero_data.home_list = team_node_ids[supervision_nodes_text[0]].to_list()
+        hetero_data.away_list = team_node_ids[supervision_nodes_text[1]].to_list()
         hetero_data.y = torch.tensor(
             self.dl.ConverDatasetResultstoNumber(df.loc[supervision_indcs, :]),
             device=self.DEVICE
         )
+
+
+        hetero_data.team_node_ids = team_node_ids
+        hetero_data.player_node_ids = player_node_ids
 
 
         return hetero_data

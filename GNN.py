@@ -22,7 +22,7 @@ class HeteroGNN(nn.Module):
                 ('player', 'after', 'player'): GCNConv(conv_dims[i], conv_dims[i+1]),
                 ('team', 'before', 'team'): GCNConv(conv_dims[i], conv_dims[i+1]),
                 ('team', 'after', 'team'): GCNConv(conv_dims[i], conv_dims[i+1])
-            }, aggr='sum')
+            }, aggr='mean')
         for i in range(len(conv_dims[:-1]))])
 
         self.fcs = nn.ModuleList([

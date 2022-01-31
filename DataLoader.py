@@ -10,9 +10,11 @@ class DataLoader:
 
 
         #CONSTANTS
-        self.DATA_COLUMNS = ['league', 'season', 'week', 'home_team', 'away_team', 'result', 'home_lineup', 'away_lineup']
+        self.DATA_COLUMNS = ['league', 'season', 'week', 'home_team', 'away_team', 'home_goal', 'away_goal', 'result', 'home_lineup', 'away_lineup']
         self.HOME_TEAM_KEY = 'home_team'
         self.AWAY_TEAM_KEY = 'away_team'
+        self.HOME_GOAL_KEY = 'home_goal'
+        self.AWAY_GOAL_KEY = 'away_goal'
         self.HOME_LINEUP_KEY = 'home_lineup'
         self.AWAY_LINEUP_KEY = 'away_lineup'
 
@@ -22,7 +24,7 @@ class DataLoader:
             self.filename,
             encoding='utf-8',
             usecols=self.DATA_COLUMNS,
-            dtype=dict(zip(self.DATA_COLUMNS, [str]*2 + [int] + [str]*5))
+            dtype=dict(zip(self.DATA_COLUMNS, [str]*2 + [int] + [str]*2 + [int]*2 + [str]*3))
         )
 
         self._data_cleanup()

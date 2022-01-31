@@ -108,7 +108,7 @@ class GraphManager:
             )), 0, 1).flatten()
         )
 
-        #============ creating used and played_in links ===========
+        # ============ creating used and played_in links ===========
         hetero_data['team', 'used', 'player'].edge_index = torch.stack((
             torch.tensor(np.repeat(team_node_ids.to_numpy(), self.dl.minimum_players_per_team)),
             torch.tensor(player_node_ids.to_numpy())
@@ -231,9 +231,19 @@ class GraphManager:
         supervision_nodes_text = self.dl.DatasetDataframetoNodeText(df.loc[supervision_indcs, :])
         hetero_data.home_list = team_node_ids[supervision_nodes_text[0]].to_list()
         hetero_data.away_list = team_node_ids[supervision_nodes_text[1]].to_list()
+        
         hetero_data.y = torch.tensor(
             self.dl.ConverDatasetResultstoNumber(df.loc[supervision_indcs, :]),
             device=self.DEVICE
+        )
+
+        hetero_data.hgoal = torch.tensor(
+            self.dl.dataset.loc[supervision_indcs, self.dl.HOME_GOAL_KEY].to_numpy(),
+            device= self.DEVICE
+        )
+        hetero_data.agoal = torch.tensor(
+            self.dl.dataset.loc[supervision_indcs, self.dl.AWAY_GOAL_KEY].to_numpy(),
+            device= self.DEVICE
         )
 
 

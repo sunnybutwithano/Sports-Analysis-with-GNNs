@@ -6,9 +6,10 @@ from torch_geometric.nn import HeteroConv, GCNConv, GATConv
 
 
 class HeteroGNN(nn.Module):
-    def __init__(self, embedding_dims, conv_dims, fc_dims, dropout: dict):
+    def __init__(self, embedding_dims, conv_dims, fc_dims, dropout: dict, classify: bool=True):
         super(HeteroGNN, self).__init__()
         self.dropout = dropout
+        self.classify = classify
         self.embedding = nn.Embedding(num_embeddings=embedding_dims[0], embedding_dim=embedding_dims[1])
 
         self.convs = nn.ModuleList([
@@ -22,7 +23,7 @@ class HeteroGNN(nn.Module):
                 ('player', 'after', 'player'): GCNConv(conv_dims[i], conv_dims[i+1]),
                 ('team', 'before', 'team'): GCNConv(conv_dims[i], conv_dims[i+1]),
                 ('team', 'after', 'team'): GCNConv(conv_dims[i], conv_dims[i+1])
-            }, aggr='mean')
+            }, aggr='sum')
         for i in range(len(conv_dims[:-1]))])
 
         self.fcs = nn.ModuleList([
@@ -71,6 +72,8 @@ class HeteroGNN(nn.Module):
             h = F.dropout(h, p=self.dropout['fc'], training=self.training)
         h = self.fcs[-1](h)
         
+        if self.classify:
+            h = self.classifier(h)
         
-        return self.classifier(h)
+        return h
 

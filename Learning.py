@@ -4,7 +4,7 @@ import torch_geometric as pyg
 import torch_geometric.data as pyg_data
 from GNN import HeteroGNN
 import GraphManager
-import Utils
+import Config
 import pickle
 
 
@@ -35,7 +35,7 @@ def result_train_step(
 
 def goal_diff_train_step(
     model: HeteroGNN,
-    g: torch_geometric.data.HeteroData,
+    g: pyg_data.HeteroData,
     criterion,
     optimizer: torch.optim.Optimizer
 ):
@@ -44,7 +44,7 @@ def goal_diff_train_step(
 
     out = model(g).flatten()
     goal_diffs = g.hgoal - g.agoal
-    loss = criterion(out, goal_diffs.float().to(Utils.GLOBALS.DEVICE.value))
+    loss = criterion(out, goal_diffs.float().to(Config.GLOBALS.DEVICE.value))
     loss.backward()
     optimizer.step()
 
@@ -61,7 +61,7 @@ def goal_diff_train_step(
 
 
 @torch.no_grad()
-def evaluation(model: HeteroGNN, g: torch_geometric.data.HeteroData):
+def result_evaluation(model: HeteroGNN, g: pyg_data.HeteroData):
     global win
     global loss
     global tie
@@ -81,7 +81,7 @@ def evaluation(model: HeteroGNN, g: torch_geometric.data.HeteroData):
 
 
 @torch.no_grad()
-def goal_diff_evaluation(model: HeteroGNN, g: torch_geometric.data.HeteroData):
+def goal_diff_evaluation(model: HeteroGNN, g: pyg_data.HeteroData):
     global win
     global loss
     global tie
@@ -112,15 +112,14 @@ def train(
     train_acc_list: list,
     eval_acc_list: list
 ):
+    if mode == 'RP':
+        train_fn = result_train_step
+    elif mode == 'GDP':
+        train_fn = goal_diff_train_step
+    else:
+        print(f'Error: mode must be in {["RP", "GDP"]}')
+        return None
     for epoch in range(epochs):
-        if mode == 'RP':
-            train_fn = result_train_step
-        elif mode == 'GDP':
-            train_fn = goal_diff_train_step
-        else:
-            print(f'Error: mode must be in {["RP", "GDP"]}')
-            return None
-
         t_loss = 0
         t_correct = 0
         t_total = 0
@@ -134,6 +133,37 @@ def train(
         print(f'Average Loss: {t_loss / len(train_indcs)} - Train Accuracy: {t_correct / t_total: .3f}')
         loss_list.append(t_loss / len(train_indcs))
         train_acc_list.append(t_correct / t_total)
+        if (epoch+1) % Config.GLOBALS.SaveEvery.value == 0:
+            torch.save(model, f'{Config.GLOBALS.SavePath.value}model.pth')
+            with open(f'{Config.GLOBALS.SavePath.value}lists.pl', 'wb') as pf:
+                pickle.dump((loss_list, train_acc_list, eval_acc_list), pf)
+
+
+def evaluation(
+    model: HeteroGNN,
+    graph_list: List[pyg_data.HeteroData],
+    eval_indcs: List[int],
+    mode: Literal['RP', 'GDP'], #RP=Result Prediction - GDP=Goal Difference Prediction
+    eval_acc_list: list
+):
+    if mode == 'RP':
+        eval_fn = result_evaluation
+    elif mode == 'GDP':
+        eval_fn = goal_diff_evaluation
+    else:
+        print(f'Error: mode must be in {["RP", "GDP"]}')
+        return None
+
+    t_correct = 0
+    t_total = 0
+    for idx in eval_indcs:
+        g = graph_list[idx]
+        correct, total = eval_fn(model, g)
+        t_correct += correct
+        t_total += total
+    print(f'Validation Accuracy: {t_correct / t_total: .3f}')
+    eval_acc_list.append(t_correct / t_total)
+    return t_correct / t_total
 
 
 def Phase1(dl, model, criterion, optimizer, train_fn, eval_fn, already_saved, rounds, epochs, loss_list, train_acc_list, eval_acc_list):
@@ -142,27 +172,15 @@ def Phase1(dl, model, criterion, optimizer, train_fn, eval_fn, already_saved, ro
         for league, league_df in dl.dataset.groupby('league'):
             print(f'Training On: {league}')
             if already_saved:
-                gm = GraphManager.load(f'{Utils.GLOBALS.LoadPath.value}{league}.gm')
+                gm = GraphManager.load(f'{Config.GLOBALS.LoadPath.value}{league}.gm')
             else:
-                gm = GraphManager.load(f'{Utils.GLOBALS.SavePath.value}{league}.gm')
+                gm = GraphManager.load(f'{Config.GLOBALS.SavePath.value}{league}.gm')
             try:
                 
 
-                    t_correct = 0
-                    t_total = 0
+                    pass
 
-                    for idx in gm.validation_mask:
-                        g = gm.graph_list[idx]
-                        correct, total = eval_fn(model, g)
-                        t_correct += correct
-                        t_total += total
-                    print(f'Validation Accuracy: {t_correct / t_total: .3f}')
-                    eval_acc_list.append(t_correct / t_total)
-
-                    if (epoch+1) % Utils.GLOBALS.SaveEvery.value == 0:
-                        torch.save(model, f'{Utils.GLOBALS.SavePath.value}model.pth')
-                        with open(f'{Utils.GLOBALS.SavePath.value}lists.pl', 'wb') as pf:
-                            pickle.dump((loss_list, train_acc_list, eval_acc_list), pf)
+                    
             except KeyboardInterrupt:
                 pass
 
@@ -174,8 +192,8 @@ def Phase1(dl, model, criterion, optimizer, train_fn, eval_fn, already_saved, ro
                 t_correct += correct
                 t_total += total
             print(f'Test Accuracy: {t_correct / t_total: .3f}')
-            torch.save(model, f'{Utils.GLOBALS.SavePath.value}model_{league}_R{round+1}_Ph1.pth')
-        torch.save(model, f'{Utils.GLOBALS.SavePath.value}model_All_R{round+1}_Ph1.pth')
+            torch.save(model, f'{Config.GLOBALS.SavePath.value}model_{league}_R{round+1}_Ph1.pth')
+        torch.save(model, f'{Config.GLOBALS.SavePath.value}model_All_R{round+1}_Ph1.pth')
             
 
 
@@ -185,9 +203,9 @@ def Phase2(dl, model, criterion, optimizer, train_fn, eval_fn, already_saved, ro
         for league, league_df in dl.dataset.groupby('league'):
             print(f'Training On: {league}')
             if already_saved:
-                gm = GraphManager.load(f'{Utils.GLOBALS.LoadPath.value}{league}.gm')
+                gm = GraphManager.load(f'{Config.GLOBALS.LoadPath.value}{league}.gm')
             else:
-                gm = GraphManager.load(f'{Utils.GLOBALS.SavePath.value}{league}.gm')
+                gm = GraphManager.load(f'{Config.GLOBALS.SavePath.value}{league}.gm')
             try:
                 train_indcs = gm.train_mask + gm.validation_mask
                 for epoch in range(epochs):
@@ -210,9 +228,9 @@ def Phase2(dl, model, criterion, optimizer, train_fn, eval_fn, already_saved, ro
                     t_total = 0
 
 
-                    if (epoch+1) % Utils.GLOBALS.SaveEvery.value == 0:
-                        torch.save(model, f'{Utils.GLOBALS.SavePath.value}model.pth')
-                        with open(f'{Utils.GLOBALS.SavePath.value}lists.pl', 'wb') as pf:
+                    if (epoch+1) % Config.GLOBALS.SaveEvery.value == 0:
+                        torch.save(model, f'{Config.GLOBALS.SavePath.value}model.pth')
+                        with open(f'{Config.GLOBALS.SavePath.value}lists.pl', 'wb') as pf:
                             pickle.dump((loss_list, train_acc_list, eval_acc_list), pf)
                             
             except KeyboardInterrupt:
@@ -226,8 +244,8 @@ def Phase2(dl, model, criterion, optimizer, train_fn, eval_fn, already_saved, ro
                 t_correct += correct
                 t_total += total
             print(f'Test Accuracy: {t_correct / t_total: .3f}')
-            torch.save(model, f'{Utils.GLOBALS.SavePath.value}model_{league}_R{round+1}_Ph2.pth')
-        torch.save(model, f'{Utils.GLOBALS.SavePath.value}model_All_R{round+1}_Ph2.pth')
+            torch.save(model, f'{Config.GLOBALS.SavePath.value}model_{league}_R{round+1}_Ph2.pth')
+        torch.save(model, f'{Config.GLOBALS.SavePath.value}model_All_R{round+1}_Ph2.pth')
 
 
 
@@ -235,9 +253,9 @@ def Phase3(dl, model, criterion, optimizer, train_fn, eval_fn, already_saved, ep
     for league, league_df in dl.dataset.groupby('league'):
         print(f'Training On: {league}')
         if already_saved:
-            gm = GraphManager.load(f'{Utils.GLOBALS.LoadPath.value}{league}.gm')
+            gm = GraphManager.load(f'{Config.GLOBALS.LoadPath.value}{league}.gm')
         else:
-            gm = GraphManager.load(f'{Utils.GLOBALS.SavePath.value}{league}.gm')
+            gm = GraphManager.load(f'{Config.GLOBALS.SavePath.value}{league}.gm')
         try:
             train_indcs = gm.train_mask + gm.validation_mask
             test_correct = 0
@@ -270,21 +288,21 @@ def Phase3(dl, model, criterion, optimizer, train_fn, eval_fn, already_saved, ep
                     t_total = 0
 
 
-                    if (epoch+1) % Utils.GLOBALS.SaveEvery.value == 0:
-                        torch.save(model, f'{Utils.GLOBALS.SavePath.value}model.pth')
-                        with open(f'{Utils.GLOBALS.SavePath.value}lists.pl', 'wb') as pf:
+                    if (epoch+1) % Config.GLOBALS.SaveEvery.value == 0:
+                        torch.save(model, f'{Config.GLOBALS.SavePath.value}model.pth')
+                        with open(f'{Config.GLOBALS.SavePath.value}lists.pl', 'wb') as pf:
                             pickle.dump((loss_list, train_acc_list, eval_acc_list), pf)
                             
         except KeyboardInterrupt:
             pass
 
-        torch.save(model, f'{Utils.GLOBALS.SavePath.value}model.pth')
-        with open(f'{Utils.GLOBALS.SavePath.value}lists.pl', 'wb') as pf:
+        torch.save(model, f'{Config.GLOBALS.SavePath.value}model.pth')
+        with open(f'{Config.GLOBALS.SavePath.value}lists.pl', 'wb') as pf:
             pickle.dump((loss_list, train_acc_list, eval_acc_list), pf)
 
         print(f'Test Accuracy: {test_correct / test_total: .3f}')
-        torch.save(model, f'{Utils.GLOBALS.SavePath.value}model_{league}_Ph3.pth')
-    torch.save(model, f'{Utils.GLOBALS.SavePath.value}model_All_Ph3.pth')
+        torch.save(model, f'{Config.GLOBALS.SavePath.value}model_{league}_Ph3.pth')
+    torch.save(model, f'{Config.GLOBALS.SavePath.value}model_All_Ph3.pth')
 
 
 

@@ -1,4 +1,4 @@
-from typing import Literal, List
+from typing import Literal, List, Union
 import torch
 import torch_geometric as pyg
 import torch_geometric.data as pyg_data
@@ -100,10 +100,48 @@ def goal_diff_evaluation(model: HeteroGNN, g: pyg_data.HeteroData):
 
 
 
+def evaluation(
+    model: HeteroGNN,
+    graph_list: List[pyg_data.HeteroData],
+    eval_indcs: List[int],
+    mode: Literal['RP', 'GDP'], #RP=Result Prediction - GDP=Goal Difference Prediction
+    eval_acc_list: list=None,
+    label: Literal['Validation', 'Test', None]=None,
+    return_counts: bool=False
+):
+    if eval_indcs is None: return
+
+    if mode == 'RP':
+        eval_fn = result_evaluation
+    elif mode == 'GDP':
+        eval_fn = goal_diff_evaluation
+    else:
+        print(f'Error: mode must be in {["RP", "GDP"]}')
+        return None
+
+    t_correct = 0
+    t_total = 0
+    for idx in eval_indcs:
+        g = graph_list[idx]
+        correct, total = eval_fn(model, g)
+        t_correct += correct
+        t_total += total
+    
+    if label is not None:
+        print(f'{label} Accuracy: {t_correct / t_total: .3f}')
+    if label == 'Validation':
+        eval_acc_list.append(t_correct / t_total)
+    if return_counts:
+        return t_correct, t_total
+    return t_correct / t_total
+
+
+
 def train(
     model: HeteroGNN,
     graph_list: List[pyg_data.HeteroData],
     train_indcs: List[int],
+    eval_indcs: Union[List[int], None],
     mode: Literal['RP', 'GDP'], #RP=Result Prediction - GDP=Goal Difference Prediction
     criterion: torch.nn.Module,
     optimizer: torch.optim.Optimizer,
@@ -133,37 +171,22 @@ def train(
         print(f'Average Loss: {t_loss / len(train_indcs)} - Train Accuracy: {t_correct / t_total: .3f}')
         loss_list.append(t_loss / len(train_indcs))
         train_acc_list.append(t_correct / t_total)
+
+        evaluation(
+            model,
+            graph_list,
+            eval_indcs,
+            mode,
+            eval_acc_list,
+            'Validation'
+        )
+
         if (epoch+1) % Config.GLOBALS.SaveEvery.value == 0:
             torch.save(model, f'{Config.GLOBALS.SavePath.value}model.pth')
             with open(f'{Config.GLOBALS.SavePath.value}lists.pl', 'wb') as pf:
                 pickle.dump((loss_list, train_acc_list, eval_acc_list), pf)
 
 
-def evaluation(
-    model: HeteroGNN,
-    graph_list: List[pyg_data.HeteroData],
-    eval_indcs: List[int],
-    mode: Literal['RP', 'GDP'], #RP=Result Prediction - GDP=Goal Difference Prediction
-    eval_acc_list: list
-):
-    if mode == 'RP':
-        eval_fn = result_evaluation
-    elif mode == 'GDP':
-        eval_fn = goal_diff_evaluation
-    else:
-        print(f'Error: mode must be in {["RP", "GDP"]}')
-        return None
-
-    t_correct = 0
-    t_total = 0
-    for idx in eval_indcs:
-        g = graph_list[idx]
-        correct, total = eval_fn(model, g)
-        t_correct += correct
-        t_total += total
-    print(f'Validation Accuracy: {t_correct / t_total: .3f}')
-    eval_acc_list.append(t_correct / t_total)
-    return t_correct / t_total
 
 
 def Phase1(dl, model, criterion, optimizer, train_fn, eval_fn, already_saved, rounds, epochs, loss_list, train_acc_list, eval_acc_list):

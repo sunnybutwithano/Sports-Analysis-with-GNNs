@@ -254,6 +254,6 @@ class GraphManager:
         return hetero_data
 
 
-def load(filename: str):
+def load(filename: str) -> GraphManager:
         with open(filename, 'rb') as pf:
             return pickle.load(pf)

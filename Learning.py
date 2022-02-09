@@ -22,7 +22,7 @@ def result_train_step(
     optimizer.zero_grad()
 
     out = model(g)
-    loss = criterion(out, g.y)
+    loss = criterion(out, g.y.long())
     loss.backward()
     optimizer.step()
 

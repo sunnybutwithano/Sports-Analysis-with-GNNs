@@ -71,6 +71,7 @@ class HeteroGNN(nn.Module):
             h = F.relu(h)
             h = F.dropout(h, p=self.dropout['fc'], training=self.training)
         h = self.fcs[-1](h)
+        h = F.dropout(h, p=self.dropout['fc'], training=self.training)
         
         if self.classify:
             h = self.classifier(h)

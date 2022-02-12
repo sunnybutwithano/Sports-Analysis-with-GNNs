@@ -14,7 +14,7 @@ class GLOBALS(enum.Enum):
 
     #Put True to Load Model and loss Lists from Load Folder - Put False to start a new training
     # ATTENTION: The result of the training will be saved in the Save Folder ANYWAYS!!! - Copy Your Work Before Starting
-    continue_training = True
+    continue_training = False
 
 
 class HYPERPARAETERS(enum.Enum):

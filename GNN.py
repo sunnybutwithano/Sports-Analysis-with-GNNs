@@ -10,7 +10,8 @@ class HeteroGNN(nn.Module):
         super(HeteroGNN, self).__init__()
         self.dropout = dropout
         self.classify = classify
-        self.embedding = nn.Embedding(num_embeddings=embedding_dims[0], embedding_dim=embedding_dims[1])
+        self.embedding_dims = embedding_dims
+        # self.embedding = nn.Embedding(num_embeddings=embedding_dims[0], embedding_dim=embedding_dims[1])
 
         self.convs = nn.ModuleList([
             HeteroConv({
@@ -26,6 +27,25 @@ class HeteroGNN(nn.Module):
             }, aggr='sum')
         for i in range(len(conv_dims[:-1]))])
 
+
+
+        # To Make up for the embedding in the Convs using one hot
+        self.convs.insert(0, 
+            HeteroConv({
+                ('team', 'win', 'team'): GCNConv(embedding_dims[0], embedding_dims[1]),
+                ('team', 'loss', 'team'): GCNConv(embedding_dims[0], embedding_dims[1]),
+                ('team', 'tie', 'team'): GCNConv(embedding_dims[0], embedding_dims[1]),
+                ('player', 'playedin', 'team'): GATConv(embedding_dims[0], embedding_dims[1], heads=1),
+                ('team', 'used', 'player'): GATConv(embedding_dims[0], embedding_dims[1], heads=1),
+                ('player', 'before', 'player'): GCNConv(embedding_dims[0], embedding_dims[1]),
+                ('player', 'after', 'player'): GCNConv(embedding_dims[0], embedding_dims[1]),
+                ('team', 'before', 'team'): GCNConv(embedding_dims[0], embedding_dims[1]),
+                ('team', 'after', 'team'): GCNConv(embedding_dims[0], embedding_dims[1])
+            }, aggr='sum')
+        )
+
+
+
         self.fcs = nn.ModuleList([
             nn.Linear(fc_dims[i], fc_dims[i+1]) for i in range(len(fc_dims[:-1]))
         ])
@@ -34,7 +54,7 @@ class HeteroGNN(nn.Module):
 
     
     def reset_parameters(self):
-        self.embedding.reset_parameters()
+        # self.embedding.reset_parameters()
         for conv in self.convs: conv.reset_parameters()
         for fc in self.fcs: fc.reset_parameters()
     
@@ -47,8 +67,9 @@ class HeteroGNN(nn.Module):
 
 
         #============= Embedding ===========
-        x_dict = {key: self.embedding(value) for key, value in x_dict.items()}
-        x_dict = {key: F.dropout(value, p=self.dropout['emb'], training=self.training) for key, value in x_dict.items()}
+        # x_dict = {key: self.embedding(value) for key, value in x_dict.items()}
+        # x_dict = {key: F.dropout(value, p=self.dropout['emb'], training=self.training) for key, value in x_dict.items()}
+        x_dict = {key: F.one_hot(value.long(), num_classes = self.embedding_dims[0]).float() for key, value in x_dict.items()}
 
 
         #============ Convolution ============
@@ -71,7 +92,7 @@ class HeteroGNN(nn.Module):
             h = F.relu(h)
             h = F.dropout(h, p=self.dropout['fc'], training=self.training)
         h = self.fcs[-1](h)
-        h = F.dropout(h, p=self.dropout['fc'], training=self.training)
+        # h = F.dropout(h, p=self.dropout['fc'], training=self.training)
         
         if self.classify:
             h = self.classifier(h)

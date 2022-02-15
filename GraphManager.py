@@ -41,6 +41,7 @@ class GraphManager:
         mode: Literal['CG', 'CW']='CG',
         validation_portion: float=0.1,
         test_portion: float=0.1,
+        window_size: int = 30,
         saveto: str=None
     ):
         self.graph_list = []
@@ -49,6 +50,8 @@ class GraphManager:
         self.test_mask = []
         if mode == 'CG':
             self._gen_continuous_growing(df)
+        elif mode == 'CW':
+            self._gen_continiuous_windowed(df, window_size)
         
         self.test_mask = list(range(int((1-test_portion) * len(self.graph_list)), len(self.graph_list)))
         self.validation_mask = list(range(int((1 - (test_portion+validation_portion)) * len(self.graph_list)), int((1-test_portion) * len(self.graph_list))))
@@ -72,6 +75,28 @@ class GraphManager:
         except KeyboardInterrupt:
             pass
 
+    
+    def _gen_continiuous_windowed(self, df: pd.DataFrame, window_size: int):
+        try:
+            season_week_list = []
+            for season, season_df in df.groupby('season'):
+                for week, week_df in season_df.groupby('week'):
+                    season_week_list.append((season, week))
+
+            for i, (season, week) in enumerate(tqdm(season_week_list)):
+                week_df = df.loc[np.logical_and(df['season'] == season, df['week'] == week), :]
+                starting_season, starting_week = season_week_list[max(0, i - window_size)]
+                start_idx = df.loc[np.logical_and(df['season'] == starting_season, df['week'] == starting_week), :].index[0]
+                g = self._gen_heterodata(
+                    df=df.loc[start_idx:week_df.index[-1], :],
+                    supervision_indcs=week_df.index.values
+                )
+                self.graph_list.append(g)
+        except KeyboardInterrupt:
+            pass
+
+
+    
     def _gen_heterodata(self, df: pd.DataFrame, messaging_indcs=0, supervision_indcs=0, remove_supervision_links: bool=True):
         hetero_data = pyg_data.HeteroData()
         entity_names = self.dl.DatasetDataframetoNumpy(df)

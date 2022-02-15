@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch_geometric.data as pyg_data
-from torch_geometric.nn import HeteroConv, GCNConv, GATConv
+from torch_geometric.nn import HeteroConv, GCNConv, GATConv, GraphConv
 
 
 class HeteroGNN(nn.Module):
@@ -12,6 +12,10 @@ class HeteroGNN(nn.Module):
         self.classify = classify
         self.embedding_dims = embedding_dims
         self.embedding = nn.Embedding(num_embeddings=embedding_dims[0], embedding_dim=embedding_dims[1])
+
+        # Insted of Embedding to Embedd One HOT
+        # self.onehot_lin = nn.Linear(embedding_dims[0], embedding_dims[1])
+
 
         self.convs = nn.ModuleList([
             HeteroConv({
@@ -54,7 +58,6 @@ class HeteroGNN(nn.Module):
 
     
     def reset_parameters(self):
-        self.embedding.reset_parameters()
         for conv in self.convs: conv.reset_parameters()
         for fc in self.fcs: fc.reset_parameters()
     
@@ -70,6 +73,8 @@ class HeteroGNN(nn.Module):
         x_dict = {key: self.embedding(value) for key, value in x_dict.items()}
         x_dict = {key: F.dropout(value, p=self.dropout['emb'], training=self.training) for key, value in x_dict.items()}
         # x_dict = {key: F.one_hot(value.long(), num_classes = self.embedding_dims[0]).float() for key, value in x_dict.items()}
+        # x_dict = {key: self.onehot_lin(value) for key, value in x_dict.items()}
+        # x_dict = {key: F.dropout(value, p=self.dropout['emb'], training=self.training) for key, value in x_dict.items()}
 
 
         #============ Convolution ============

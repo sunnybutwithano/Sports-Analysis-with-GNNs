@@ -105,8 +105,6 @@ def evaluation(
     graph_list: List[pyg_data.HeteroData],
     eval_indcs: List[int],
     mode: Literal['RP', 'GDP'], #RP=Result Prediction - GDP=Goal Difference Prediction
-    eval_acc_list: list=None,
-    label: Literal['Validation', 'Test', None]=None,
     return_counts: bool=False
 ):
     if eval_indcs is None: return
@@ -127,10 +125,6 @@ def evaluation(
         t_correct += correct
         t_total += total
     
-    if label is not None:
-        print(f'{label} Accuracy: {t_correct / t_total: .3f}')
-    if label == 'Validation':
-        eval_acc_list.append(t_correct / t_total)
     if return_counts:
         return t_correct, t_total
     return t_correct / t_total
@@ -141,14 +135,9 @@ def train(
     model: HeteroGNN,
     graph_list: List[pyg_data.HeteroData],
     train_indcs: List[int],
-    eval_indcs: Union[List[int], None],
     mode: Literal['RP', 'GDP'], #RP=Result Prediction - GDP=Goal Difference Prediction
     criterion: torch.nn.Module,
     optimizer: torch.optim.Optimizer,
-    epochs: int,
-    loss_list: list,
-    train_acc_list: list,
-    eval_acc_list: list
 ):
     if mode == 'RP':
         train_fn = result_train_step
@@ -157,34 +146,19 @@ def train(
     else:
         print(f'Error: mode must be in {["RP", "GDP"]}')
         return None
-    for epoch in range(epochs):
-        t_loss = 0
-        t_correct = 0
-        t_total = 0
-        for idx in train_indcs:
-            g = graph_list[idx]
-            loss, correct, total = train_fn(model, g, criterion, optimizer)
-            t_loss += loss
-            t_correct += correct
-            t_total += total
-        print(f'=================================== EPOCH {epoch + 1} ===================================')
-        print(f'Average Loss: {t_loss / len(train_indcs)} - Train Accuracy: {t_correct / t_total: .3f}')
-        loss_list.append(t_loss / len(train_indcs))
-        train_acc_list.append(t_correct / t_total)
+    t_loss = 0
+    t_correct = 0
+    t_total = 0
+    for idx in train_indcs:
+        g = graph_list[idx]
+        loss, correct, total = train_fn(model, g, criterion, optimizer)
+        t_loss += loss
+        t_correct += correct
+        t_total += total
+    return t_loss / len(train_indcs), t_correct / t_total, 
 
-        evaluation(
-            model,
-            graph_list,
-            eval_indcs,
-            mode,
-            eval_acc_list,
-            'Validation'
-        )
-
-        if (epoch+1) % Config.GLOBALS.SaveEvery.value == 0:
-            torch.save(model, f'{Config.GLOBALS.SavePath.value}model.pth')
-            with open(f'{Config.GLOBALS.SavePath.value}lists.pl', 'wb') as pf:
-                pickle.dump((loss_list, train_acc_list, eval_acc_list), pf)
+    
+        
 
 
 

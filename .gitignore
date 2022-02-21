@@ -2,4 +2,5 @@
 *.gm
 *.pth
 Runs*
+NEWRES*
 torch-cuda102/*

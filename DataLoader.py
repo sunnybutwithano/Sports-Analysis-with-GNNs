@@ -52,6 +52,10 @@ class DataLoader:
         ]
         self.dataset = self.dataset.drop(corrupted.index, axis=0).reset_index(drop= True)
 
+        #Sorting The leagues based on the matches in a lueage
+        leagues_sorted = self.dataset['league'].value_counts(ascending=False) * -1
+        self.dataset = self.dataset.sort_values(by=['league'], kind='mergesort', key=lambda z: leagues_sorted[z]).reset_index(drop=True)
+
 
     #Converts a dataframe of dataset to numpy array
     def DatasetDataframetoNumpy(self, dataframe: pd.DataFrame):

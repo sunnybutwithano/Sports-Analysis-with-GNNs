@@ -10,7 +10,7 @@ class GLOBALS(enum.Enum):
     SaveEvery = 10
 
     #Put True to load the Graphs from Load Folder - Put False to make the graphs, save them in Save Folder and use them
-    already_saved = True
+    already_saved = False
 
     #Put True to Load Model and loss Lists from Load Folder - Put False to start a new training
     # ATTENTION: The result of the training will be saved in the Save Folder ANYWAYS!!! - Copy Your Work Before Starting
@@ -24,9 +24,9 @@ class HYPERPARAETERS(enum.Enum):
     Phase2Rounds = 2
     Phase2Epochs = 20
     Phase3Epochs = 2
-    EmbeddingDim = 8
-    ConvDims = [8, 16, 16, 16]
-    FCDims = [32, 16, 8,  3]
+    EmbeddingDim = 4
+    ConvDims = [4, 8, 16, 32]
+    FCDims = [64, 16, 8,  3]
     DropOuts = {'emb': 0.5, 'conv': 0.4, 'fc': 0.4}
-    ValidationPortion = 0.1
-    TestPortion = 0.1
+    ValidationPortion = 0.2
+    TestPortion = 0.2

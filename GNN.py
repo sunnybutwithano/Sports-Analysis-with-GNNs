@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch_geometric.data as pyg_data
-from torch_geometric.nn import HeteroConv, GCNConv, GATConv, GraphConv, SAGEConv
+from torch_geometric.nn import HeteroConv, GCNConv, GATConv, GraphConv, SAGEConv, FastRGCNConv, RGCNConv
 
 
 class HeteroGNN(nn.Module):
@@ -105,6 +105,73 @@ class HeteroGNN(nn.Module):
         return h
 
 
+
+class Hetero_to_Homo_GNN(nn.Module):
+    def __init__(self, embedding_dims, conv_dims, fc_dims, dropout: dict, classify: bool=True):
+        super(HeteroGNN, self).__init__()
+        self.dropout = dropout
+        self.classify = classify
+        self.embedding_dims = embedding_dims
+        self.embedding = nn.Embedding(num_embeddings=embedding_dims[0], embedding_dim=embedding_dims[1])
+
+        self.convs = nn.ModuleList([
+            FastRGCNConv(conv_dims[i], conv_dims[i+1], num_relations=9)
+        for i in range(len(conv_dims[:-1]))])
+
+        self.fcs = nn.ModuleList([
+            nn.Linear(fc_dims[i], fc_dims[i+1]) for i in range(len(fc_dims[:-1]))
+        ])
+
+        self.classifier = nn.LogSoftmax(dim=1)
+
+    
+    def reset_parameters(self):
+        for conv in self.convs: conv.reset_parameters()
+        for fc in self.fcs: fc.reset_parameters()
+        self.embedding.reset_parameters()
+    
+
+    def forward(self, g: pyg_data.HeteroData):
+        hg = g.to_homogeneous()
+        home_list = g.home_list
+        away_list = g.away_list
+
+
+        #============= Embedding ===========
+        hg.x = self.embedding(hg.x)
+        hg.x = F.dropout(hg.x, p=self.dropout['emb'], training=self.training)
+
+
+        #============ Convolution ============
+        for conv in self.convs[:-1]:
+            hg.x = conv(hg.x, hg.edge_index, edge_type=hg.edge_type)
+            hg.x = F.relu(hg.x)
+            hg.x = F.dropout(hg.x, p=self.dropout['conv'], training=self.training)
+        hg.x = self.convs[-1](hg.x, hg.edge_index, edge_type=hg.edge_type)
+        hg.x = F.dropout(hg.x, p=self.dropout['conv'], training=self.training)
+
+
+        #============ Fully Connected ============
+        h = torch.cat((
+            hg.x[home_list],
+            hg.x[away_list]
+        ), dim=1)
+
+        for fc in self.fcs[:-1]:
+            h = fc(h)
+            h = F.relu(h)
+            h = F.dropout(h, p=self.dropout['fc'], training=self.training)
+        h = self.fcs[-1](h)
+        # h = F.dropout(h, p=self.dropout['fc'], training=self.training)
+        
+        if self.classify:
+            h = self.classifier(h)
+        
+        return h
+
+
+
+
 class BladeChest(nn.Module):
   def __init__(self, feature_size, blade_chest_size, dropout_p=0.5):
     super(BladeChest, self).__init__()
@@ -125,12 +192,12 @@ class BladeChest(nn.Module):
 
   def _encode_team(self, team):
     blade = self.blade_transform(team)
-    blade = self.blade_bn(blade)
+    # blade = self.blade_bn(blade)
     blade = self.activation(blade)
     blade = self.regularizer(blade)
 
     chest = self.chest_transform(team)
-    chest = self.chest_bn(chest)
+    # chest = self.chest_bn(chest)
     chest = self.activation(chest)
     chest = self.regularizer(chest)
 
@@ -138,7 +205,7 @@ class BladeChest(nn.Module):
 
 
   def _matchup(self, home_blade, home_chest, away_blade, away_chest):
-    return (home_blade, away_chest).sum(-1) - (away_blade, home_chest).sum(-1)
+    return (home_blade * away_chest).sum(-1) - (away_blade * home_chest).sum(-1)
 
   def forward(self, home, away):
     home_blade, home_chest = self._encode_team(home)
@@ -182,8 +249,8 @@ class HeteroGNN_BladeChest(nn.Module):
     
     def reset_parameters(self):
         for conv in self.convs: conv.reset_parameters()
-        for fc in self.fcs: fc.reset_parameters()
-        self.decoder.reset_parameters()
+        # for fc in self.fcs: fc.reset_parameters()
+        # self.decoder.reset_parameters()
     
 
     def forward(self, g: pyg_data.HeteroData):

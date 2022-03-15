@@ -6,7 +6,6 @@ class GLOBALS(enum.Enum):
     DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
     SavePath = 'SavePath/'
     LoadPath = 'LoadPath/'
-    # LoadPath = 'Runs/26Jan_2/'
     SaveEvery = 10
 
     #Put True to load the Graphs from Load Folder - Put False to make the graphs, save them in Save Folder and use them
@@ -24,10 +23,10 @@ class HYPERPARAETERS(enum.Enum):
     Phase2Rounds = 2
     Phase2Epochs = 20
     Phase3Epochs = 2
-    EmbeddingDim = 4
-    ConvDims = [4, 8, 16, 32]
-    FCDims = [64, 16, 8,  3]
+    EmbeddingDim = 2
+    ConvDims = [2, 4, 12]
+    FCDims = [24, 8,  3]
     BladeChestDim = 8
-    DropOuts = {'emb': 0.5, 'conv': 0.4, 'fc': 0.4}
-    ValidationPortion = 0.2
-    TestPortion = 0.2
+    DropOuts = {'emb': 0.5, 'conv': 0.3, 'fc': 0.4}
+    ValidationPortion = 0.1
+    TestPortion = 0.1

@@ -67,7 +67,7 @@ def result_evaluation(model: HeteroGNN, g: pyg_data.HeteroData):
     global tie
     model.eval()
 
-    out = model(g)
+    out: torch.Tensor = model(g)
     pred = torch.argmax(out, dim=-1)
     correct = (pred == g.y).sum().item()
     total = g.y.shape[0]
@@ -77,7 +77,7 @@ def result_evaluation(model: HeteroGNN, g: pyg_data.HeteroData):
     loss += (pred == 2).sum().item()
 
     model.train()
-    return correct, total
+    return correct, total, out.detach().cpu().numpy().tolist()
 
 
 @torch.no_grad()
@@ -105,7 +105,8 @@ def evaluation(
     graph_list: List[pyg_data.HeteroData],
     eval_indcs: List[int],
     mode: Literal['RP', 'GDP'], #RP=Result Prediction - GDP=Goal Difference Prediction
-    return_counts: bool=False
+    return_counts: bool=False,
+    return_logits: bool=False
 ):
     if eval_indcs is None: return
 
@@ -121,13 +122,18 @@ def evaluation(
     t_total = 0
     for idx in eval_indcs:
         g = graph_list[idx]
-        correct, total = eval_fn(model, g)
+        correct, total, out = eval_fn(model, g)
         t_correct += correct
         t_total += total
     
+    returns = []
+
     if return_counts:
-        return t_correct, t_total
-    return t_correct / t_total
+        returns.extend([t_correct, t_total])
+    else: returns.append(t_correct / t_total)
+    if return_logits:
+        returns.append(out)
+    return tuple(returns)
 
 
 
